@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
+app.use('/img_lvup', express.static(path.join(__dirname, 'img_lvup')));
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 
@@ -50,7 +51,8 @@ app.post('/enviar_recibo', async (req, res) => {
 // Configuración de almacenamiento para multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const dir = path.join(__dirname, '../public/img_lvup');
+    // Cambiado para guardar en la carpeta img_lvup en la raíz del backend
+    const dir = path.join(__dirname, 'img_lvup');
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -76,7 +78,7 @@ app.post('/img_lvup/upload', upload.single('imagen'), (req, res) => {
 app.post('/img_lvup/delete', (req, res) => {
   const { filename } = req.body;
   if (!filename) return res.status(400).json({ success: false, error: 'Falta el nombre de la imagen.' });
-  const filePath = path.join(__dirname, '../public/img_lvup', filename);
+  const filePath = path.join(__dirname, 'img_lvup', filename);
   fs.unlink(filePath, err => {
     if (err) {
       return res.status(500).json({ success: false, error: 'No se pudo eliminar la imagen.' });
