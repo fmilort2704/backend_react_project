@@ -13,6 +13,11 @@ app.use('/img_lvup', express.static(path.join(__dirname, 'img_lvup')));
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`Petición recibida: ${req.method} ${req.path}`);
+  next();
+});
+
 const PORT = process.env.PORT || 4000;
 
 // Configuración SMTP usando variables de entorno
