@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -6,9 +8,21 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
+
 app.use('/img_lvup', express.static(path.join(__dirname, 'img_lvup')));
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
+
+const PORT = process.env.PORT || 4000;
+
+// Configuración SMTP usando variables de entorno
+let transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  }
+});
 
 app.post('/enviar_recibo', async (req, res) => {
   const { email, nombre, apellido, direccion, metodoPago, productos, total, nombreProducto, precio, cantidad } = req.body;
@@ -26,18 +40,9 @@ app.post('/enviar_recibo', async (req, res) => {
   }
   mensaje += `\nDirección: ${direccion}\nMétodo de pago: ${metodoPago}\n\n¡Gracias por confiar en LvUp!`;
 
-  // Configura tu transporte SMTP (ejemplo con Gmail)
-  let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'noreplylvup@gmail.com',
-      pass: 'eefkuylildolsowl'      
-    }
-  });
-
   try {
     await transporter.sendMail({
-      from: 'noreplylvup@gmail.com',
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Recibo de tu compra LvUp',
       text: mensaje
@@ -51,7 +56,6 @@ app.post('/enviar_recibo', async (req, res) => {
 // Configuración de almacenamiento para multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Cambiado para guardar en la carpeta img_lvup en la raíz del backend
     const dir = path.join(__dirname, 'img_lvup');
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -69,7 +73,6 @@ app.post('/img_lvup/upload', upload.single('imagen'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, error: 'No se recibió ninguna imagen.' });
   }
-  // Construir la URL pública de la imagen subida
   const url = `/img_lvup/${req.file.filename}`;
   res.json({ success: true, filename: req.file.filename, url });
 });
@@ -87,6 +90,6 @@ app.post('/img_lvup/delete', (req, res) => {
   });
 });
 
-app.listen(4000, () => {
-  console.log('Servidor de correo escuchando en http://localhost:4000');
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
