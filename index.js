@@ -10,7 +10,24 @@ const fs = require('fs');
 const app = express();
 
 app.use('/img_lvup', express.static(path.join(__dirname, 'img_lvup')));
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://lvup.kesug.com'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use((req, res, next) => {
