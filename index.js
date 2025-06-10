@@ -10,7 +10,7 @@ const fs = require('fs');
 const app = express();
 
 app.use('/img_lvup', express.static(path.join(__dirname, 'img_lvup')));
-const allowedOrigins = ['http://localhost:3000', 'http://lvup.kesug.com'];
+const allowedOrigins = ['http://localhost:3000', 'http://lvup.kesug.com', 'https://lvup.kesug.com'];
 
 app.use(cors({
   origin: function (origin, callback) {
